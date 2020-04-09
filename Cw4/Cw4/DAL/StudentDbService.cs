@@ -18,7 +18,8 @@ namespace Cw4.DAL
                     command.Connection = client;
 
                     //Sql injection np. komendą localhost:port/api/students/1 Drop table Student
-                    command.CommandText = "Select IdEnrollment from Student Where IndexNumber = " + id;
+                    command.CommandText = "Select IdEnrollment from Student Where IndexNumber = @id";
+                    command.Parameters.AddWithValue("id", id);
                     client.Open();
                     var dr = command.ExecuteReader();
                     while (dr.Read())
