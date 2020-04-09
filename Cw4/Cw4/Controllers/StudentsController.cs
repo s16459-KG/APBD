@@ -14,10 +14,17 @@ namespace Cw4.Controllers
             _studentDbService = studentDbService;
         }
 
+        [HttpGet("{id}")]
+        public IActionResult GetEnrollment(string id)
+        {
+            return Ok(_studentDbService.GetEnrollment(id));
+        }
+
         [HttpGet]
         public IActionResult GetStudents()
         {
             return Ok(_studentDbService.GetStudents());
         }
+
     }
 }
