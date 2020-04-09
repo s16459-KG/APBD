@@ -90,3 +90,11 @@ H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\obj\Debu
 H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\obj\Debug\netcoreapp3.1\Cw4.dll
 H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\obj\Debug\netcoreapp3.1\Cw4.pdb
 H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\obj\Debug\netcoreapp3.1\Cw4.genruntimeconfig.cache
+H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\bin\Debug\netcoreapp3.1\System.Data.SqlClient.dll
+H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\bin\Debug\netcoreapp3.1\runtimes\win-arm64\native\sni.dll
+H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\sni.dll
+H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\sni.dll
+H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
+H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
+H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\obj\Debug\netcoreapp3.1\Cw4.csproj.CoreCompileInputs.cache
+H:\Users\KiloGram\Documents\MOJE\PJATK\6 semestr\APBD\APBD_Repo\Cw4\Cw4\obj\Debug\netcoreapp3.1\Cw4.MvcApplicationPartsAssemblyInfo.cache
