@@ -1,4 +1,5 @@
 ﻿using Cw4.Models;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
@@ -48,10 +49,10 @@ namespace Cw4.DAL
                     {
                         output.Add(new Student
                         {
-                            IndexNumber = int.Parse(dr["IndexNumber"].ToString()),
+                            IndexNumber = dr["IndexNumber"].ToString(),
                             FirstName = dr["FirstName"].ToString(),
                             LastName = dr["LastName"].ToString(),
-                            BirthDate = dr["BirthDate"].ToString(),
+                            BirthDate = DateTime.Parse(dr["BirthDate"].ToString()),
                             IdEnrollment = int.Parse(dr["IdEnrollment"].ToString())
                         });
                     }
