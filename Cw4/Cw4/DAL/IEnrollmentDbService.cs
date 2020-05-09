@@ -8,4 +8,6 @@ public interface IEnrollmentDbService
 
     public Enrolment PromoteStudents(PromoteStudentsRequest request);
 
+    public bool CheckIndex(string index);
+
     }

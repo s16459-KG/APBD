@@ -1,6 +1,8 @@
 using Cw4.DAL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,12 +38,46 @@ namespace Cw4
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IEnrollmentDbService enrollmentDbService)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+
+            /* KOLEJNOŒÆ MIDDLEWARE MA ZNACZENIE!
+   * UserMiddleware bêdzie pomocne w zadaniu 2, jako generic nale¿y wykorzystaæ utworzon¹ klasê
+   * Chcemy, ¿eby middleware z 2 zadania zapisywa³ WSZYSTKIE przychodz¹ce ¿¹dania, dlatego dodajemy go przez middlewarem z 1. zadania
+   */
+
+            //app.UseMiddleware<T>();
+
+            app.Use(async (context, next) =>
+            {
+
+                if (!context.Request.Headers.ContainsKey("Index"))
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await context.Response.WriteAsync("Nie podano indeksu w nag³ówku");
+                    return;
+                }
+
+
+                var index = context.Request.Headers["Index"].ToString();
+
+                // ³¹czenie z baz¹ danych i sprawdzenie czy istnieje student
+                if (!enrollmentDbService.CheckIndex(index))
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await context.Response.WriteAsync("Nie znaleziono studenta w bazie danych");
+                    return;
+                }
+
+                // jak wszystko ok to przekazujemy ¿¹danie do kolejnego middleware'a
+                await next();
+            });
+
 
             app.UseRouting();
 

@@ -163,5 +163,28 @@ namespace Cw4.DAL
             }
             return enrolment;
         }
+
+
+        public bool CheckIndex(string index)
+        {
+            using (var connection = new SqlConnection(SqlConn))
+            using (var command = new SqlCommand())
+            {
+                command.Connection = connection;
+                connection.Open();
+
+                command.CommandText = "Select IndexNumber from Student where IndexNumber = @index";
+                command.Parameters.AddWithValue("index", index);
+                var dr = command.ExecuteReader();
+                if (dr.Read())
+                {
+                    dr.Close();
+                    return true;
+                }
+                dr.Close();
+                return false;
+            }
+        }
+
     }
 }
