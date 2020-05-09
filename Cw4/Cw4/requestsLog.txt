@@ -1,0 +1,7 @@
+
+Log : POST , /api/enrollments , 
+Log : POST , /api/enrollments , 
+Log : GET , /api/students/5 , 
+Log : GET , /api/students , 
+Log : GET , /api/students/5 , 
+Log : GET , /api/students/5 , ?name=Kowalski

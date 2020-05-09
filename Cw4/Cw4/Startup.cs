@@ -1,13 +1,11 @@
 using Cw4.DAL;
+using Cw4.Middlerwares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Linq;
 
 namespace Cw4
 {
@@ -52,6 +50,8 @@ namespace Cw4
    */
 
             //app.UseMiddleware<T>();
+
+            app.UseMiddleware<LoggingMiddleware>();
 
             app.Use(async (context, next) =>
             {
