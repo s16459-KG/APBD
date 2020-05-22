@@ -1,6 +1,7 @@
 ﻿using Cw4.DAL;
 using Cw4.DTOs.Requests;
 using Cw4.Models;
+using Cw4.Pomocnicze;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -20,13 +21,6 @@ namespace Cw4.Controllers
         private static int licznik = 0;
         private readonly IStudentDbService _studentDbService;
         public IConfiguration Configuration { get; set; }
-
-        /*
-        public StudentsController(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-        */
 
         public StudentsController(IStudentDbService studentDbService, IConfiguration configuration)
         {
@@ -48,11 +42,25 @@ namespace Cw4.Controllers
             return Ok(_studentDbService.GetStudents());
         }
 
+
+        [HttpPost("refresh-token/{token}")]
+        [AllowAnonymous]
+        public IActionResult RefreshToken(string token)
+        {
+            Student student = StudentDbService.CheckRefToken(token);
+            if (student == null) return BadRequest();
+            return Login(new LoginRequest(student.IndexNumber, student.password));
+        }
+
         [HttpPost]
         [AllowAnonymous]
         public IActionResult Login(LoginRequest request)
         {
-            Student student = StudentDbService.GetStudent(request.Login, request.Haslo);
+            Student student = StudentDbService.GetStudent(request.Login);
+            //Console.WriteLine(PasswordHelper.CreateSecretValue(student.password, student.salt));
+            if(!PasswordHelper.Validate(request.Haslo, student.salt, student.password))
+                return BadRequest("Błędne hasło");
+
             var claims = new[]
             {
                  new Claim(ClaimTypes.NameIdentifier,student.IndexNumber),
@@ -73,10 +81,15 @@ namespace Cw4.Controllers
                     expires: DateTime.Now.AddMinutes(5),
                     signingCredentials: creeds
                 );
+
+            var refreshToken = Guid.NewGuid();
+            DateTime dateTime = DateTime.Now;  
+            StudentDbService.AddRefreshToken(student, refreshToken.ToString(), dateTime.AddDays(1));
+
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
-                refreshToken = Guid.NewGuid()
+                refreshToken
             });
 
         }

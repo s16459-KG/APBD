@@ -15,5 +15,7 @@ namespace Cw4.Models
         public int IdEnrollment { get; set; }
 
         public string password { get; set; }
+
+        public string salt { get; set; }
     }
 }

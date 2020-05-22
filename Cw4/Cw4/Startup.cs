@@ -77,7 +77,7 @@ namespace Cw4
 
             app.UseAuthentication();
 
-            /*
+            
             app.Use(async (context, next) =>
             {
                 if (!context.Request.Headers.ContainsKey("Index"))
@@ -98,7 +98,7 @@ namespace Cw4
                 // jak wszystko ok to przekazujemy ¿¹danie do kolejnego middleware'a
                 await next();
             });
-            */
+            
 
             app.UseRouting();
 

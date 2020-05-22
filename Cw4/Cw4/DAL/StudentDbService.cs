@@ -62,16 +62,16 @@ namespace Cw4.DAL
             return output;
         }
 
-        public static Student GetStudent(string login, string haslo)
+        public static Student GetStudent(string login)
         {
+            Console.WriteLine("Login w GetStudent: " + login);
             using (var client = new SqlConnection(SqlConn))
             {
                 using (var command = new SqlCommand())
                 {
                     command.Connection = client;
-                    command.CommandText = "Select * from Student where indexnumber = @index and password = @password";
+                    command.CommandText = "Select * from Student where indexnumber = @index";
                     command.Parameters.AddWithValue("index", login);
-                    command.Parameters.AddWithValue("password", haslo);
 
                     client.Open();
                     var dr = command.ExecuteReader();
@@ -84,11 +84,59 @@ namespace Cw4.DAL
                         FirstName = dr["FirstName"].ToString(),
                         LastName = dr["LastName"].ToString(),
                         BirthDate = DateTime.Parse(dr["BirthDate"].ToString()),
-                        IdEnrollment = int.Parse(dr["IdEnrollment"].ToString())
+                        IdEnrollment = int.Parse(dr["IdEnrollment"].ToString()),
+                        password = dr["password"].ToString(),
+                        salt = dr["FirstName"].ToString(),
                     };
                 }
             }
         }
+
+
+        public static Student CheckRefToken(string refToken)
+        {
+            using (var connection = new SqlConnection(SqlConn))
+            using (var command = new SqlCommand())
+            {
+                command.Connection = connection;
+                connection.Open();
+
+                command.CommandText = "Select IndexNumber, password from Student where refToken = @refToken and refTokenExpiryTime > getdate()";
+                command.Parameters.AddWithValue("refToken", refToken);
+                var dr = command.ExecuteReader();
+                if (!dr.Read()) return null;
+
+                return new Student
+                {
+                    IndexNumber = dr["IndexNumber"].ToString(),
+                    password = dr["password"].ToString(),
+
+                };
+            }
+        }
+
+        public static bool AddRefreshToken(Student student, string refToken, DateTime expiryTime)
+        {
+            using (var client = new SqlConnection(SqlConn))
+            {
+                using (var command = new SqlCommand())
+                {
+                    command.Connection = client;
+                    command.CommandText = "Update Student set refToken = @refToken, refTokenExpiryTime = @expiryTime" +
+                        " where indexNumber = @index";
+                    command.Parameters.AddWithValue("index", student.IndexNumber);
+                    command.Parameters.AddWithValue("refToken", refToken);
+                    command.Parameters.AddWithValue("expiryTime", expiryTime);
+
+                    client.Open();
+                    var dr = command.ExecuteNonQuery();
+
+                    if (dr != 1) return false;
+                    return true;
+                }
+            }
+        }
+
 
     }
 }
