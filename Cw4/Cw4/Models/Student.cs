@@ -13,5 +13,7 @@ namespace Cw4.Models
         public DateTime BirthDate { get; set; }
 
         public int IdEnrollment { get; set; }
+
+        public string password { get; set; }
     }
 }

@@ -92,7 +92,8 @@ namespace Cw4.DAL
                     dr.Close();
 
                     //Jeżeli indeks jest unikalny to dodajemy studenta do bazy
-                    command.CommandText = "Insert into Student values (@indexNumber, @firstName, @lastName, @birthDate, @idEnroll)";
+                    command.CommandText = "Insert into Student (IndexNumber, firstname, lastname, birthdate, IdEnrollment ) " +
+                        "values (@indexNumber, @firstName, @lastName, @birthDate, @idEnroll)";
                     command.Parameters.AddWithValue("indexNumber", student.IndexNumber);
                     command.Parameters.AddWithValue("firstName", student.FirstName);
                     command.Parameters.AddWithValue("lastName", student.LastName);
@@ -175,6 +176,28 @@ namespace Cw4.DAL
 
                 command.CommandText = "Select IndexNumber from Student where IndexNumber = @index";
                 command.Parameters.AddWithValue("index", index);
+                var dr = command.ExecuteReader();
+                if (dr.Read())
+                {
+                    dr.Close();
+                    return true;
+                }
+                dr.Close();
+                return false;
+            }
+        }
+
+        public static bool CheckIndexAndPassword(string index, string password)
+        {
+            using (var connection = new SqlConnection(SqlConn))
+            using (var command = new SqlCommand())
+            {
+                command.Connection = connection;
+                connection.Open();
+
+                command.CommandText = "Select IndexNumber from Student where IndexNumber = @index and password = @password";
+                command.Parameters.AddWithValue("index", index);
+                command.Parameters.AddWithValue("password", password);
                 var dr = command.ExecuteReader();
                 if (dr.Read())
                 {
