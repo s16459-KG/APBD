@@ -109,7 +109,7 @@ namespace Cw4.DAL
                 return new Student
                 {
                     IndexNumber = dr["IndexNumber"].ToString(),
-                    password = dr["password"].ToString(),
+                    password = dr["password"].ToString(), 
 
                 };
             }
