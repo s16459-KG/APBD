@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Cw4.Controllers
 {
     [ApiController]
-    [Authorize(Roles = "employee")]
+    //[Authorize(Roles = "employee")]
     public class EnrollmentsController : Controller
     {
         

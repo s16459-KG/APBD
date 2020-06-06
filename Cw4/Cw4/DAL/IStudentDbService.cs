@@ -1,4 +1,4 @@
-﻿using Cw4.Models;
+﻿using Cw4.ModelsBaza;
 using System.Collections.Generic;
 
 namespace Cw4.DAL
@@ -8,5 +8,7 @@ namespace Cw4.DAL
         IEnumerable<Student> GetStudents();
 
         int GetEnrollment(string id);
+        Student ModifyStudent(Student student);
+        string DeleteStudent(string id);
     }
 }

@@ -8,7 +8,6 @@ namespace Cw4.Pomocnicze
     public class PasswordHelper
     {
 
-
     public static string CreateSecretValue (string value, string salt)
         {
             var valueBytes = KeyDerivation.Pbkdf2(

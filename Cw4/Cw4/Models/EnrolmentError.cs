@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cw4.ModelsBaza;
 
 namespace Cw4.Models
 {
-    public class EnrolmentError : Enrolment
+    public class EnrolmentError : Enrollment
     {
 
         public EnrolmentError(string errorText)

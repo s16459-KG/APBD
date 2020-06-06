@@ -1,8 +1,11 @@
 ﻿using Cw4.DTOs.Requests;
 using Cw4.Models;
+using Cw4.ModelsBaza;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace Cw4.DAL
 {
@@ -35,31 +38,9 @@ namespace Cw4.DAL
 
         public IEnumerable<Student> GetStudents()
         {
-            var output = new List<Student>();
-            using (var client = new SqlConnection(SqlConn))
-            {
-                using (var command = new SqlCommand())
-                {
-                    command.Connection = client;
-                    command.CommandText = "Select * from Student";
-
-                    client.Open();
-                    var dr = command.ExecuteReader();
-
-                    while (dr.Read())
-                    {
-                        output.Add(new Student
-                        {
-                            IndexNumber = dr["IndexNumber"].ToString(),
-                            FirstName = dr["FirstName"].ToString(),
-                            LastName = dr["LastName"].ToString(),
-                            BirthDate = DateTime.Parse(dr["BirthDate"].ToString()),
-                            IdEnrollment = int.Parse(dr["IdEnrollment"].ToString())
-                        });
-                    }
-                }
-            }
-            return output;
+            var db = new s16459Context();
+            Console.WriteLine("Tu byłem!");
+            return db.Student.ToList();
         }
 
         public static Student GetStudent(string login)
@@ -85,8 +66,6 @@ namespace Cw4.DAL
                         LastName = dr["LastName"].ToString(),
                         BirthDate = DateTime.Parse(dr["BirthDate"].ToString()),
                         IdEnrollment = int.Parse(dr["IdEnrollment"].ToString()),
-                        password = dr["password"].ToString(),
-                        salt = dr["FirstName"].ToString(),
                     };
                 }
             }
@@ -108,8 +87,7 @@ namespace Cw4.DAL
 
                 return new Student
                 {
-                    IndexNumber = dr["IndexNumber"].ToString(),
-                    password = dr["password"].ToString(), 
+                    IndexNumber = dr["IndexNumber"].ToString()
 
                 };
             }
@@ -137,6 +115,24 @@ namespace Cw4.DAL
             }
         }
 
+        public Student ModifyStudent(Student student)
+        {
+            using (var context = new s16459Context())
+            {
+                context.Entry(student).State = EntityState.Modified;
+                context.SaveChanges();
+            }
+            return student;
+        }
 
+        public string DeleteStudent(string id)
+        {
+            var db = new s16459Context();
+            var student = new Student { IndexNumber = id };
+            db.Entry(student).State = EntityState.Deleted;
+            db.SaveChanges();
+            Console.WriteLine("Tu też byłem!");
+            return "usunieto studenta";
+        }
     }
 }

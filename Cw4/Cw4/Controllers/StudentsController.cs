@@ -1,6 +1,6 @@
 ﻿using Cw4.DAL;
 using Cw4.DTOs.Requests;
-using Cw4.Models;
+using Cw4.ModelsBaza;
 using Cw4.Pomocnicze;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +14,7 @@ using System.Text;
 namespace Cw4.Controllers
 {
     [ApiController]
-    [Authorize]
+    //[Authorize]
     [Route("api/students")]
     public class StudentsController : ControllerBase
     {
@@ -42,6 +42,18 @@ namespace Cw4.Controllers
             return Ok(_studentDbService.GetStudents());
         }
 
+        [HttpPost("modify")]
+        public IActionResult ModifyStudent(Student student)
+        {
+            return Ok(_studentDbService.ModifyStudent(student));
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteStudent(String id)
+        {
+            return Ok(_studentDbService.DeleteStudent(id));
+        }
+
 
         [HttpPost("refresh-token/{token}")]
         [AllowAnonymous]
@@ -49,7 +61,7 @@ namespace Cw4.Controllers
         {
             Student student = StudentDbService.CheckRefToken(token);
             if (student == null) return BadRequest();
-            return Login(new LoginRequest(student.IndexNumber, student.password));
+            return Login(new LoginRequest(student.IndexNumber, student.Password));
         }
 
         [HttpPost]
@@ -58,7 +70,7 @@ namespace Cw4.Controllers
         {
             Student student = StudentDbService.GetStudent(request.Login);
             //Console.WriteLine(PasswordHelper.CreateSecretValue(student.password, student.salt));
-            if(!PasswordHelper.Validate(request.Haslo, student.salt, student.password))
+            if(!PasswordHelper.Validate(request.Haslo, student.Salt, student.Password))
                 return BadRequest("Błędne hasło");
 
             var claims = new[]
@@ -93,6 +105,7 @@ namespace Cw4.Controllers
             });
 
         }
+        
 
     }
 }

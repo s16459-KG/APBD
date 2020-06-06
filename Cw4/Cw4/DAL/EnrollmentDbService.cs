@@ -1,9 +1,12 @@
 ﻿using Cw4.DTOs.Requests;
 using Cw4.DTOs.Responses;
+using Cw4.ModelsBaza;
 using Cw4.Models;
 using System;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cw4.DAL
 {
@@ -14,154 +17,106 @@ namespace Cw4.DAL
 
         public EnrollStudentResponse EnrollStudents(EnrollStudentRequest request)
         {
-            //Mapowanieroll
+            //Mapowanie
             var student = new Student();
             student.IndexNumber = request.IndexNumber;
             student.FirstName = request.FirstName;
             student.LastName = request.LastName;
             student.BirthDate = DateTime.Parse(request.BirthDate);
 
+            //tworzymy odpowiedz dla klienta
             var enrolment = new EnrollStudentResponse();
             enrolment.Semester = 1;
 
-            int idStudies = 0;
             int lastEnrollmentId = 0;
 
-            using (var connection = new SqlConnection(SqlConn))
-            using (var command = new SqlCommand())
+            //Inicjacja Kontekstu Entity FrameWork
+            var db = new s16459Context();
+
+            //Sprawdzamy czy istnieją studia o podanej nazwie
+            var wynik =  db.Studies.Where(e => e.Name == request.Studies);
+            if (wynik == null)
             {
-                command.Connection = connection;
-                connection.Open();
-                var transaction = connection.BeginTransaction();
+                return null;
+            }
+            
+            //Przypisujemy id studiów
+            var idStudies = wynik.ToList().Last().IdStudy;
+            enrolment.studia = request.Studies;
 
-                //Sprawdzamy czy istnieją studia o podanej nazwie
-                command.CommandText = "Select IdStudy from Studies where name = @studyName";
-                command.Parameters.AddWithValue("studyName", request.Studies);
-                command.Transaction = transaction;
-                var dr = command.ExecuteReader();
-                if (!dr.Read())
-                {
-                    dr.Close();
-                    transaction.Rollback();
-                    return null;
-                }
-                idStudies = (int)dr["IdStudy"];
-                dr.Close();
-                enrolment.studia = request.Studies;
+            //Sprawdzamy czy istnieje już wpis dla danych studiów na dany semestr
+            var wynik1 = db.Enrollment.Where(e => e.IdStudy == idStudies & e.Semester == 1);
+            if (wynik1 == null) {
+                //Sprawdzenie ostatniego numeru idEnrollment aby dodać z o 1 większym kolejny wpis
+                var wynik2 = db.Enrollment.Select(e => e.IdEnrollment).Max();
+                //Dodanie nowego Enrollmentu do bazy
+                db.Enrollment.Add(new Enrollment(wynik2, 1, idStudies, DateTime.Now));
+                student.IdEnrollment = lastEnrollmentId + 1;
+            }
+            else
+            {
+                lastEnrollmentId = (int)wynik1.Select(s => s.IdEnrollment).First();
+                student.IdEnrollment = lastEnrollmentId;
+            }
 
-                //Sprawdzamy czy istnieje już wpis dla danych studiów na dany semestr
-                command.CommandText = "Select top 1 IdEnrollment from Enrollment where IdStudy = @idStudy " +
-                    "and semester = 1 order by StartDate desc";
-                command.Parameters.AddWithValue("idStudy", idStudies);
-                dr = command.ExecuteReader();
-                if (!dr.Read())
-                {
-                    //Sprawdzenie ostatniego numeru idEnrollment aby dodać z o 1 większym kolejny wpis
-                    dr.Close();
-                    command.CommandText = "Select max(IdEnrollment) as IdEnrollment from Enrollment";
-                    dr = command.ExecuteReader();
-                    if (dr.Read())
-                    {
-                        lastEnrollmentId = (int)dr["IdEnrollment"];
-                    }
-                    dr.Close();
+            enrolment.IdEnrollment = student.IdEnrollment;
 
-                    //Dodanie nowego enrollmentu
-                    command.CommandText = "Insert into Enrollment values(@idEnrollment, 1, @idStudies ,@actualDate )";
-                    command.Parameters.AddWithValue("idEnrollment", lastEnrollmentId + 1);
-                    command.Parameters.AddWithValue("idStudies", idStudies);
-                    command.Parameters.AddWithValue("actualDate", DateTime.Now);
-                    int dodaneWiersze = command.ExecuteNonQuery();
-                    student.IdEnrollment = lastEnrollmentId + 1;
-                }
-                else
-                {
-                    lastEnrollmentId = (int)dr["IdEnrollment"];
-                    student.IdEnrollment = lastEnrollmentId;
-                    dr.Close();
-                }
+            var wynik3 = db.Student.Where(s => s.IndexNumber == student.IndexNumber).Select(s => s.IndexNumber);
 
-                enrolment.IdEnrollment = student.IdEnrollment;
-
-                //Sprawdzamy czy indeks studenta jest unikalny
-                command.CommandText = "Select IndexNumber from Student where IndexNumber = @iNumber";
-                command.Parameters.AddWithValue("iNumber", student.IndexNumber);
-                dr = command.ExecuteReader();
-                if (!dr.Read())
-                {
-                    dr.Close();
-
-                    //Jeżeli indeks jest unikalny to dodajemy studenta do bazy
-                    command.CommandText = "Insert into Student (IndexNumber, firstname, lastname, birthdate, IdEnrollment ) " +
-                        "values (@indexNumber, @firstName, @lastName, @birthDate, @idEnroll)";
-                    command.Parameters.AddWithValue("indexNumber", student.IndexNumber);
-                    command.Parameters.AddWithValue("firstName", student.FirstName);
-                    command.Parameters.AddWithValue("lastName", student.LastName);
-                    command.Parameters.AddWithValue("birthDate", student.BirthDate.ToShortDateString());
-                    command.Parameters.AddWithValue("idEnroll", student.IdEnrollment);
-                    int dodaneWiersze = command.ExecuteNonQuery();
-                }
-                else
-                {
-                    dr.Close();
-                    transaction.Rollback();
-                    return null;
-                }
-
-                if (!dr.IsClosed)
-                {
-                    dr.Close();
-                }
-                transaction.Commit();
-                connection.Close();
+            if (wynik3.FirstOrDefault() == null)
+            {
+                db.Student.Add(student);
+                db.SaveChanges();
+            }
+            else
+            {
+                return null;
             }
             return enrolment;
         }
 
-        public Enrolment PromoteStudents(PromoteStudentsRequest request)
+        public Enrollment PromoteStudents(PromoteStudentsRequest request)
         {
             //Mapowanie
-            var enrolment = new Enrolment();
+            var enrolment = new Enrollment();
             enrolment.Semester = request.Semester;
 
-            using (var connection = new SqlConnection(SqlConn))
-            using (var command = new SqlCommand("PromoteStudents", connection))
+            //Inicjacja Kontekstu Entity FrameWork
+            var db = new s16459Context();
+
+            Console.WriteLine(1);
+
+            var studiesParam = new SqlParameter("@Studies", request.Studies);
+            var semesterParam = new SqlParameter("@Semester", enrolment.Semester);
+
+            var returnValue = db.Database.ExecuteSqlCommand("PromoteStudents @Studies, @Semester", studiesParam, semesterParam);
+
+            if (returnValue == -1)
             {
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.Add(new SqlParameter("@Studies", request.Studies));
-                command.Parameters.Add(new SqlParameter("@Semester", enrolment.Semester));
-                connection.Open();
-                var transaction = connection.BeginTransaction();
-                command.Transaction = transaction;
-                var returnValue = command.ExecuteNonQuery();
-                if (returnValue == -1)
-                {
-                    transaction.Rollback();
-                    return new EnrolmentError("Brak przedmiotu lub konkretnego semestru");
-                }
-
-                command.CommandType = CommandType.Text;
-                command.CommandText = "Select IdEnrollment, e.IdStudy, StartDate " +
-                                      " from Enrollment as e left join Studies as s on e.IdStudy = s.IdStudy " +
-                                      " where Semester = @Semester2 + 1 and Name = @Studies2";
-                command.Parameters.Add(new SqlParameter("@Studies2", request.Studies));
-                command.Parameters.Add(new SqlParameter("@Semester2", enrolment.Semester));
-                command.Transaction = transaction;
-                var dr = command.ExecuteReader();
-
-                if (dr.Read())
-                {
-                    enrolment.IdEnrollment = (int)dr["IdEnrollment"];
-                    enrolment.StartDate = DateTime.Parse(dr["StartDate"].ToString());
-                    enrolment.IdStudy = (int)dr["IdStudy"];
-                    dr.Close();
-                }
-                else
-                {
-                    transaction.Rollback();
-                }
-                transaction.Commit();
+                return new EnrolmentError("Brak przedmiotu lub konkretnego semestru");
             }
+            Console.WriteLine(2);
+
+            var wynik = db.Studies.Where(s => s.Name == request.Studies)
+                .Join(
+                    db.Enrollment.Where(e => e.Semester == enrolment.Semester),
+                    e => e.IdStudy,
+                    study => study.IdStudy,
+                    (e, study) => new
+                    {
+                        IdEnrollment = study.IdEnrollment,
+                        IdStudy = e.IdStudy,
+                        StartDate = study.StartDate,
+
+                    }).ToList();
+
+            if (wynik.FirstOrDefault() != null)
+            {
+                enrolment.IdEnrollment = wynik.FirstOrDefault().IdEnrollment;
+                enrolment.StartDate = wynik.FirstOrDefault().StartDate;
+                enrolment.IdStudy = wynik.FirstOrDefault().IdStudy;
+            }
+            db.SaveChanges();
             return enrolment;
         }
 
