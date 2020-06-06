@@ -14,7 +14,7 @@ using System.Text;
 namespace Cw4.Controllers
 {
     [ApiController]
-    //[Authorize]
+    [Authorize]
     [Route("api/students")]
     public class StudentsController : ControllerBase
     {
